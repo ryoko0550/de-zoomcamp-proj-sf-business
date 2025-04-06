@@ -13,6 +13,7 @@ with
             {{ dbt.safe_cast("unique_row_id", api.Column.translate_type("bytes")) }}
             as businessid,
             {{ dbt.safe_cast("ownership_name", api.Column.translate_type("string")) }} as owner,
+            {{ dbt.safe_cast("ttxid", api.Column.translate_type("string")) }} as locationid,
             {{ dbt.safe_cast("full_business_address", api.Column.translate_type("string")) }}
             as business_address,
             {{ dbt.safe_cast("city", api.Column.translate_type("string")) }} as business_city,
@@ -29,7 +30,7 @@ with
             {{ dbt.safe_cast("lic", api.Column.translate_type("string")) }} as lic,
             {{ dbt.safe_cast("naic_code", api.Column.translate_type("string")) }} as naic_code,
 
-            {{ dbt.safe_cast("supervisor_district", api.Column.translate_type("string")) }}
+            {{ dbt.safe_cast("supervisor_district", api.Column.translate_type("integer")) }}
             as supervisor_district,
             {{
                 dbt.safe_cast(
@@ -56,6 +57,7 @@ with
 select 
     i.businessid,
     i.owner,
+    i.locationid,
     i.business_address,
     i.business_city,
     i.business_state,
