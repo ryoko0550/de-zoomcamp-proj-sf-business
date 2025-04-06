@@ -2,8 +2,7 @@
 
 with
     businessdata as (
-        select
-            *
+        select *
         from {{ source("staging", "sf_business_data") }}
         where unique_row_id is not null
     )
@@ -49,8 +48,9 @@ select
         ) as integer
     ) as administratively_closed
 
-from businessdata,
-    unnest(split(lic," ")) as lic_code,
-    unnest(split(naic_code," ")) as naic_code
+from
+    businessdata,
+    unnest(split(lic, " ")) as lic_code,
+    unnest(split(naic_code, " ")) as naic_code
 
 limit 1000

@@ -7,3 +7,81 @@ sources:
       # loaded_at_field: record_loaded_at
     tables:
       - name: sf_business_data
+
+models:
+  - name: stg_sf_business_data
+    description: ""
+    columns:
+      - name: businessid
+        data_type: bytes
+        description: ""
+
+      - name: owner
+        data_type: string
+        description: ""
+
+      - name: business_address
+        data_type: string
+        description: ""
+
+      - name: business_city
+        data_type: string
+        description: ""
+
+      - name: business_state
+        data_type: string
+        description: ""
+
+      - name: business_zip
+        data_type: int64
+        description: ""
+
+      - name: business_start
+        data_type: timestamp
+        description: ""
+
+      - name: business_end
+        data_type: timestamp
+        description: ""
+
+      - name: location_start
+        data_type: timestamp
+        description: ""
+
+      - name: location_end
+        data_type: timestamp
+        description: ""
+
+      - name: lic_code
+        data_type: string
+        description: ""
+        tests:
+          - relationships:
+              field: Code
+              to: ref('lic_lookup')
+              severity: warn
+
+      - name: naic_code
+        data_type: string
+        description: ""
+        tests:
+          - relationships:
+              field: NAICS_Code
+              to: ref('naics_lookup')
+              severity: warn
+
+      - name: supervisor_district
+        data_type: string
+        description: ""
+
+      - name: neighborhoods_analysis_boundaries
+        data_type: string
+        description: ""
+
+      - name: business_corridor
+        data_type: string
+        description: ""
+
+      - name: administratively_closed
+        data_type: int64
+        description: ""
