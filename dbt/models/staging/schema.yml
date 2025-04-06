@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: staging
+    database: sf-registered-business
+    schema: sf_registered_business
+      # loaded_at_field: record_loaded_at
+    tables:
+      - name: sf_business_data
