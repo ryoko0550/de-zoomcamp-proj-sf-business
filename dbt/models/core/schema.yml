@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: fct_sf_registered_business
+    description: "Aggregated table of all registered business locations in SF from 1900 to 2025."
+    columns:
+      - name: businessid
+        data_type: bytes
+        description: "unique business id"
+
+      - name: owner
+        data_type: string
+        description: "business owner name"
+
+      - name: locationid
+        data_type: string
+        description: "unique business location id"
+
+      - name: business_address
+        data_type: string
+        description: "business address"
+
+      - name: business_city
+        data_type: string
+        description: "business city"
+
+      - name: business_state
+        data_type: string
+        description: "business state, including outside of the US"
+
+      - name: business_zip
+        data_type: int64
+        description: "business zip, including outside of the US"
+
+      - name: business_start
+        data_type: timestamp
+        description: "business start timestamp"
+
+      - name: business_end
+        data_type: timestamp
+        description: "business end timestamp"
+
+      - name: location_start
+        data_type: timestamp
+        description: "location start timestamp"
+
+      - name: location_end
+        data_type: timestamp
+        description: "location end timestamp"
+
+      - name: supervisor_district
+        data_type: int64
+        description: "supervisor district, 1-11 and null"
+
+      - name: neighborhoods_analysis_boundaries
+        data_type: string
+        description: ""
+
+      - name: business_corridor
+        data_type: string
+        description: ""
+
+      - name: administratively_closed
+        data_type: int64
+        description: "1 for administratively closed, cannot be used to filter all closed locations"
+
+      - name: lic_code
+        data_type: string
+        description: "lic code"
+
+      - name: naic_code
+        data_type: string
+        description: "naic code"
+
+      - name: lic_description
+        data_type: string
+        description: "lic business type"
+
+      - name: naic_description
+        data_type: string
+        description: "naic business type"
+
+      - name: supervisor
+        data_type: string
+        description: "supervisor name (current as of Apr 2025)"
+
+      - name: in_state_indicator
+        data_type: int64
+        description: "whether the business address is in CA"
+
+      - name: location_duration
+        data_type: int64
+        description: "in-business duration"

@@ -18,3 +18,4 @@ left join {{ref('dim_naic')}} as dn
     on stg.naic_code = dn.code
 left join {{ref('dim_supervisor')}} ds
     on stg.supervisor_district = ds.district
+where date_diff(date(IFNULL(location_end, current_timestamp())), date(location_start), day) >=0

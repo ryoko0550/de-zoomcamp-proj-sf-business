@@ -71,8 +71,9 @@ models:
               severity: warn
 
       - name: supervisor_district
-        data_type: string
+        data_type: integer
         description: ""
+
 
       - name: neighborhoods_analysis_boundaries
         data_type: string
