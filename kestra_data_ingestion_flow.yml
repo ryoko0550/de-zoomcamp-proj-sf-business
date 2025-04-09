@@ -1,0 +1,177 @@
+id: business-data-ingestion
+namespace: de-zoomcamp
+description: |
+  The CSV Data used in the course: https://data.sfgov.org/resource/g8m3-pdis.csv
+
+inputs:
+  - id: total_rows
+    type: INT
+    defaults: 340000
+  - id: row_limit
+    type: INT
+    defaults: 50000
+
+variables:
+  file: "g8m3-pdis-offset-{{taskrun.value}}.csv"
+  gcs_file: "gs://{{kv('GCP_BUCKET_NAME')}}/{{vars.file}}"
+  table: "{{kv('GCP_DATASET')}}.registered_business_{{taskrun.value}}"
+  data: "{{outputs.extract[taskrun.value].outputFiles['g8m3-pdis-offset-' ~ taskrun.value ~ '.csv']}}"
+
+tasks:
+  - id: set_label
+    type: io.kestra.plugin.core.execution.Labels
+    labels:
+      amount: inputs.total_rows
+      file: "upload"
+
+  - id: generate_offsets
+    type: io.kestra.plugin.scripts.python.Script
+    script: |
+      from kestra import Kestra
+      offset_list = [str(i) for i in range(0,{{inputs.total_rows}},{{inputs.row_limit}})]
+      Kestra.outputs({'results':offset_list})
+
+  - id: process_by_page
+    type: io.kestra.plugin.core.flow.ForEach
+    values: "{{ outputs.generate_offsets.vars.results}}"
+    concurrencyLimit: 1
+    tasks:
+      - id: extract
+        type: io.kestra.plugin.scripts.shell.Commands
+        outputFiles:
+          - "*.csv"
+        taskRunner:
+          type: io.kestra.plugin.core.runner.Process
+        commands:
+          - wget -qO- https://data.sfgov.org/resource/g8m3-pdis.csv?\$limit={{inputs.row_limit}}\&\$offset={{taskrun.value}} > {{render(vars.file)}}
+
+      - id: upload_to_gcs
+        type: io.kestra.plugin.gcp.gcs.Upload
+        from: "{{render(vars.data)}}"
+        to: "{{render(vars.gcs_file)}}"
+
+      - id: bq_sf_business_data
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          CREATE TABLE IF NOT EXISTS `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.sf_business_data`
+          (
+              unique_row_id BYTES OPTIONS (description = 'Unique row ID Byte type'),
+              uniqueid STRING OPTIONS (description = 'Unique formula'), 
+              ttxid STRING OPTIONS (description = 'Location identifier'), 
+              certificate_number INT64 OPTIONS (description ='Seven digit number assigned to registered business accounts'),
+              ownership_name STRING OPTIONS (description = 'Business owner(s) name'),
+              dba_name STRING OPTIONS (description = 'Doing Business As Name or Location Name'),
+              full_business_address STRING OPTIONS (description = 'Business location street address'),
+              city STRING OPTIONS (description = 'Business location city'),
+              state STRING OPTIONS (description = 'Business location state'),
+              business_zip STRING OPTIONS (description = 'Business location zip code'),
+              dba_start_date DATETIME OPTIONS (description = 'Start date of the business'),
+              dba_end_date DATETIME OPTIONS (description = 'End date of the business'),
+              location_start_date DATETIME OPTIONS (description = 'Start date at the location'),
+              location_end_date DATETIME OPTIONS (description = 'End date at the location, if closed'),
+              administratively_closed STRING OPTIONS (description = 'Business locations marked as “Administratively Closed” have not filed or communicated with TTX for 3 years, or were marked as closed following a notification from another City and County Department.'),
+              mailing_address_1 STRING OPTIONS (description = 'Address for mailing'),
+              mail_city STRING OPTIONS (description = 'Mailing address city'),
+              mail_zipcode STRING OPTIONS (description = 'Mailing address zipcode'),
+              mail_state STRING OPTIONS (description = 'Mailing address state'),
+              naic_code STRING OPTIONS (description = 'The North American Industry Classification System (NAICS) code'),
+              naic_code_description STRING OPTIONS (description = 'The Business Activity that the NAICS code maps on to ("Multiple" if there are multiple codes indicated for the business).'),
+              naics_code_descriptions_list STRING OPTIONS (description = 'A list of all NAICS code descriptions separated by semi-colon'),
+              parking_tax BOOL OPTIONS (description = 'Whether or not this business pays the parking tax'),
+              transient_occupancy_tax BOOL OPTIONS (description = 'Whether or not this business pays the transient occupancy tax'),
+              lic STRING OPTIONS (description = 'The LIC code of the business, if multiple, separated by spaces'),
+              lic_code_description STRING OPTIONS (description = 'The LIC code description ("Multiple" if there are multiple codes for a business)'),
+              lic_code_descriptions_list STRING OPTIONS (description = 'A list of all LIC code descriptions separated by semi-colon'),
+              supervisor_district STRING OPTIONS (description = 'The Supervisor District in which the business location falls. Not applicable outside of San Francisco. Boundary reference: https://data.sfgov.org/d/xz9b-wyfc'),
+              neighborhoods_analysis_boundaries STRING OPTIONS (description = 'The Analysis Neighborhood in which the business location falls. Not applicable outside of San Francisco. Boundary reference: https://data.sfgov.org/d/p5b7-5n3h'),
+              business_corridor STRING OPTIONS (description = 'The Business Corridor in which the the business location falls, if it is in one. Not all business locations are in a corridor. Boundary reference: https://data.sfgov.org/d/h7xa-2xwk'),
+              location GEOGRAPHY OPTIONS (description = 'The latitude and longitude of the business location for mapping purposes.')
+          )
+          PARTITION BY DATE_TRUNC(dba_start_date, MONTH);
+      
+      - id: bq_sf_business_table_ext
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          CREATE OR REPLACE EXTERNAL TABLE`{{kv('GCP_PROJECT_ID')}}.{{render(vars.table)}}_ext`
+          (
+              uniqueid STRING OPTIONS (description = 'Unique formula'),
+              ttxid STRING OPTIONS (description = 'Location identifier'), 
+              certificate_number INT64 OPTIONS (description ='Seven digit number assigned to registered business accounts'),
+              ownership_name STRING OPTIONS (description = 'Business owner(s) name'),
+              dba_name STRING OPTIONS (description = 'Doing Business As Name or Location Name'),
+              full_business_address STRING OPTIONS (description = 'Business location street address'),
+              city STRING OPTIONS (description = 'Business location city'),
+              state STRING OPTIONS (description = 'Business location state'),
+              business_zip STRING OPTIONS (description = 'Business location zip code'),
+              dba_start_date DATETIME OPTIONS (description = 'Start date of the business'),
+              dba_end_date DATETIME OPTIONS (description = 'End date of the business'),
+              location_start_date DATETIME OPTIONS (description = 'Start date at the location'),
+              location_end_date DATETIME OPTIONS (description = 'End date at the location, if closed'),
+              administratively_closed STRING OPTIONS (description = 'Business locations marked as “Administratively Closed” have not filed or communicated with TTX for 3 years, or were marked as closed following a notification from another City and County Department.'),
+              mailing_address_1 STRING OPTIONS (description = 'Address for mailing'),
+              mail_city STRING OPTIONS (description = 'Mailing address city'),
+              mail_zipcode STRING OPTIONS (description = 'Mailing address zipcode'),
+              mail_state STRING OPTIONS (description = 'Mailing address state'),
+              naic_code STRING OPTIONS (description = 'The North American Industry Classification System (NAICS) code'),
+              naic_code_description STRING OPTIONS (description = 'The Business Activity that the NAICS code maps on to ("Multiple" if there are multiple codes indicated for the business).'),
+              naics_code_descriptions_list STRING OPTIONS (description = 'A list of all NAICS code descriptions separated by semi-colon'),
+              parking_tax BOOL OPTIONS (description = 'Whether or not this business pays the parking tax'),
+              transient_occupancy_tax BOOL OPTIONS (description = 'Whether or not this business pays the transient occupancy tax'),
+              lic STRING OPTIONS (description = 'The LIC code of the business, if multiple, separated by spaces'),
+              lic_code_description STRING OPTIONS (description = 'The LIC code description ("Multiple" if there are multiple codes for a business)'),
+              lic_code_descriptions_list STRING OPTIONS (description = 'A list of all LIC code descriptions separated by semi-colon'),
+              supervisor_district STRING OPTIONS (description = 'The Supervisor District in which the business location falls. Not applicable outside of San Francisco.'),
+              neighborhoods_analysis_boundaries STRING OPTIONS (description = 'The Analysis Neighborhood in which the business location falls. Not applicable outside of San Francisco.'),
+              business_corridor STRING OPTIONS (description = 'The Business Corridor in which the the business location falls, if it is in one. Not all business locations are in a corridor. Boundary reference: https://data.sfgov.org/d/h7xa-2xwk'),
+              location GEOGRAPHY OPTIONS (description = 'The latitude and longitude of the business location for mapping purposes.'),
+              dummy_column_1 STRING OPTIONS (description = 'Dummy column 1'),
+              dummy_column_2 STRING OPTIONS (description = 'Dummy column 2'),
+              dummy_column_3 STRING OPTIONS (description = 'Dummy column 3'),
+              dummy_column_4 STRING OPTIONS (description = 'Dummy column 4'),
+              dummy_column_5 STRING OPTIONS (description = 'Dummy column 5'),
+              dummy_column_6 STRING OPTIONS (description = 'Dummy column 6'),
+              dummy_column_7 STRING OPTIONS (description = 'Dummy column 7')
+          )
+          OPTIONS (
+              format = 'CSV',
+              uris = ['{{render(vars.gcs_file)}}'],
+              skip_leading_rows = 1,
+              ignore_unknown_values = FALSE
+          );
+          
+      - id: bq_sf_business_table_tmp
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          CREATE OR REPLACE TABLE `{{kv('GCP_PROJECT_ID')}}.{{render(vars.table)}}`
+          AS
+          SELECT
+            MD5(CONCAT(
+              COALESCE(CAST(ttxid AS STRING), ""),
+              COALESCE(CAST(certificate_number AS STRING), ""),
+              COALESCE(CAST(ownership_name AS STRING), ""),
+              COALESCE(CAST(dba_start_date AS STRING), "")
+            )) AS unique_row_id, uniqueid, ttxid, certificate_number, ownership_name, dba_name, full_business_address, city, state, business_zip, dba_start_date, dba_end_date, location_start_date, location_end_date, administratively_closed, mailing_address_1, mail_city, mail_zipcode, mail_state, naic_code, naic_code_description, naics_code_descriptions_list, parking_tax, transient_occupancy_tax, lic, lic_code_description, lic_code_descriptions_list, supervisor_district, neighborhoods_analysis_boundaries, business_corridor, location
+            FROM `{{kv('GCP_PROJECT_ID')}}.{{render(vars.table)}}_ext`;
+
+      - id: bq_sf_business_merge
+        type: io.kestra.plugin.gcp.bigquery.Query
+        sql: |
+          MERGE INTO `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.sf_business_data` F
+          USING `{{kv('GCP_PROJECT_ID')}}.{{render(vars.table)}}` M
+          ON F.unique_row_id = M.unique_row_id
+          WHEN NOT MATCHED THEN
+            INSERT(unique_row_id, uniqueid, ttxid, certificate_number, ownership_name, dba_name, full_business_address, city, state, business_zip, dba_start_date, dba_end_date, location_start_date, location_end_date, administratively_closed, mailing_address_1, mail_city, mail_zipcode, mail_state, naic_code, naic_code_description, naics_code_descriptions_list, parking_tax, transient_occupancy_tax, lic, lic_code_description, lic_code_descriptions_list, supervisor_district, neighborhoods_analysis_boundaries, business_corridor, location)
+            VALUES(M.unique_row_id, M.uniqueid, M.ttxid, M.certificate_number, M.ownership_name, M.dba_name, M.full_business_address, M.city, M.state, M.business_zip, M.dba_start_date, M.dba_end_date, M.location_start_date, M.location_end_date, M.administratively_closed, M.mailing_address_1, M.mail_city, M.mail_zipcode, M.mail_state, M.naic_code, M.naic_code_description, M.naics_code_descriptions_list, M.parking_tax, M.transient_occupancy_tax, M.lic, M.lic_code_description, M.lic_code_descriptions_list, M.supervisor_district, M.neighborhoods_analysis_boundaries, M.business_corridor, M.location);
+            
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+    description: If you'd like to explore Kestra outputs, disable it.
+    disabled: false
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{kv('GCP_CREDS')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"
