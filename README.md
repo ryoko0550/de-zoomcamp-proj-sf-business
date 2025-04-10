@@ -33,6 +33,8 @@ docker-compose up -d
 ```
 To interact with Kestra from browser, you should also forward port 8080 from the VM to your localhost. (See 32:45 of https://www.youtube.com/watch?v=ae-CV2KfoN0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=14)
 
+Create the key-value pairs to connect to you Cloud Storage and BigQuery. Especially, remember the `GCP-CREDS` that contains the credential information. 
+
 Create a flow in Kestra, and copy the content in kestra_data_ingestion_flow.yml into the flow. We hereby explain a couple of key parts in the flow:
 ```yml
 inputs:
