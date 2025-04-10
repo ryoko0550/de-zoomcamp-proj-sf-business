@@ -72,7 +72,7 @@ Row 501 to row 1500 will be downloaded. The value following `offset=` is the off
 ```
 This task type `ForEach` will run for each value in the input list, which is the `offset_list` we mentioned in the previou task (`generate_offsets`). Note the list is not passed by the list name, but by the variable name `{{ outputs.generate_offsets.vars.results}}`.
 
-For each `offset` value, a series of tasks will be run. We briefly describe each task here:
+For each offset value, a series of tasks will be run. We briefly describe each task here:
 1. `extract`: download the data and write it as a .csv file.
 2. `upload_to_gcs`: upload the downloaded file to Cloud Storage. Files with identical names will be overwritten.
 3. `bq_sf_business_data`: create the overall table `sf_business_data` if the table does not exist.
@@ -81,3 +81,9 @@ For each `offset` value, a series of tasks will be run. We briefly describe each
 6. `bq_sf_business_merge`: merge the table containing data from only 1 file to the overall table `sf_business_data`. A row will only be added if the value of `unique_row_id` does not exist in the overall table.
 
 After the aforementioend steps are done for each file, we delete all the temporary files with task `purge_files`. Up till now, all the data should already be stored in Cloud Storage, and the data needed should all be in the table `sf_business_data`. We are now ready to futher process it with dbt and generate the data needed for the dashboard. 
+
+One more thing before we leave the Kestra section: when a task is run more than once, merely task_id is insufficient for finding a specific task run. For example, the `extract` task here is run once for each offset value. To obtain the downloaded file for a task run, the `vars.data` is constructed as following:
+```yml
+  data: "{{outputs.extract[taskrun.value].outputFiles['g8m3-pdis-offset-' ~ taskrun.value ~ '.csv']}}"
+```
+Note the `[taskrun.value]` after the `extract`. The `taskrun.value` is the current value in the `ForEach` task. This will guide Kestra to find the `extract` task run for that offset value, and thus the downloaded file.
