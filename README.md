@@ -20,10 +20,10 @@ In this project, we are using the Google Cloud Platform (GCP). We setup the foll
 
 (Step 1-3 can be done following the instructions from: https://www.youtube.com/watch?v=Y2ux7gq3Z0o&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=12)
 
-5. Create a virtual machine (VM).
-6. Install docker, docker compose, and Python in the VM.
-7. Setup config file in ~/.ssh folder. The file is not shown here as it's rather straightforward and the IP address will vary)
-8. Use VSCode to connect to VM
+4. Create a virtual machine (VM).
+5. Install docker, docker compose, and Python in the VM.
+6. Setup config file in ~/.ssh folder. The file is not shown here as it's rather straightforward and the IP address will vary)
+7. Use VSCode to connect to VM
 
 (Step 4-7 can be done following the instructions from: https://www.youtube.com/watch?v=ae-CV2KfoN0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=14)
 ### Data ingestion with Kestra
