@@ -108,6 +108,6 @@ Two tests were run during the staging table build, the purpose of which is to en
 
 The model shcema yml file contains descriptions of the final fact table and the columns in it. Dbt auto-generate documentations based on that.
 
-Finally, submit a dbt deploy job and trigger it. the transformed data are now sent back to the data warehouse(BigQuery).
+Finally, submit a dbt deploy job and trigger it. The transformed data are now sent back to the data warehouse(BigQuery).
 
 (Please find detailed dbt models and files under the 'dbt' folder.)
