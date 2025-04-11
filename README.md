@@ -12,6 +12,11 @@ The results are shown in the following dashboard:
 
 ## Steps
 In this section, we give a step-by-step walkthrough of the project. This will include platform setup with terraform, data ingestion and pre-process with Kestra, detailed data process with dbt, and final dashboard setup with Looker studio.
+
+See the flowchart attached:
+
+<img width="888" alt="Screenshot 2025-04-10 at 9 59 15 PM" src="https://github.com/user-attachments/assets/8b5c27b0-d934-4a07-a112-5925f5d5ef21" />
+
 ### Setup Google Cloud Platform and other infrastructures
 In this project, we are using the Google Cloud Platform (GCP). We setup the following:
 1. Create a service account with BigQuery Admin, Storage Admin, and Compute Admin.
