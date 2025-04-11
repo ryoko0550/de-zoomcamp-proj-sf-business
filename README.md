@@ -8,7 +8,8 @@ In this project, we utlized the data of registered business in San Francisco fro
 3. How many restaurants opens or closes in the past 10 years?
 
 The results are shown in the following dashboard: 
-<img width="1130" alt="Screenshot 2025-04-09 at 8 48 42 PM" src="https://github.com/user-attachments/assets/7b46f058-a182-406b-98ac-911042f0f635" />
+
+<img width="808" alt="Screenshot 2025-04-10 at 10 23 15 PM" src="https://github.com/user-attachments/assets/f9a614c9-1720-45de-9549-75e0fa8e6f8d" />
 
 ## Steps
 In this section, we give a step-by-step walkthrough of the project. This will include platform setup with terraform, data ingestion and pre-process with Kestra, detailed data process with dbt, and final dashboard setup with Looker studio.
@@ -105,6 +106,8 @@ The dbt lineage chart is as below:
 
 Two tests were run during the staging table build, the purpose of which is to ensure that all LIC and NAIC codes appear in LIC and NAIC lookup tables, so that we know no wrong codes were used in the fact table.
 
-Finally, the model shcema yml file contains descriptions of the final fact table and the columns in it. Dbt auto-generate documentations based on that.
+The model shcema yml file contains descriptions of the final fact table and the columns in it. Dbt auto-generate documentations based on that.
+
+Finally, submit a dbt deploy job and trigger it.
 
 (Please find detailed dbt models and files under the 'dbt' folder.)
