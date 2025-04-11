@@ -90,7 +90,8 @@ One more thing before we leave the Kestra section: when a task is run more than 
 ```
 Note the `[taskrun.value]` after the `extract`. The `taskrun.value` is the current value in the `ForEach` task. This will guide Kestra to find the `extract` task run for that offset value, and thus the downloaded file.
 
-### data transformation with dbt
-In this section, 4 fact tables and 3 dimension tables were generated and sent to BigQuery. The 4 fact tables include (1)the master fact table of all registered business records in SF; (2)the aggregated monthly business activities by business location start date (3)all registered business records in SF for inactive business locations (4)all registered business records in SF for businesses with at least one active location. the 4 fact tables should be able to meet the daily analytics needs with different areas of focus and granularities.
+### Data transformation with dbt
+In this section, 4 fact tables and 3 dimension tables were generated and sent to BigQuery. The 4 fact tables include (1) the master fact table of all registered business records in SF; (2) the aggregated monthly business activities by business location start date; (3) all registered business records in SF for inactive business locations; (4) all registered business records in SF for businesses with at least one active location. the 4 fact tables should be able to meet the daily analytics needs with different areas of focus and granularities.
 
 The dbt lineage chart is as below:
+<img width="907" alt="Screenshot 2025-04-10 at 8 45 49 PM" src="https://github.com/user-attachments/assets/7ab0a4be-caf2-4b44-946d-6e1689131b32" />
