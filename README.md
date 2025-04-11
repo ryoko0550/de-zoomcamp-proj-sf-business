@@ -97,6 +97,7 @@ The dbt lineage chart is as below:
 
 <img width="907" alt="Screenshot 2025-04-10 at 8 45 49 PM" src="https://github.com/user-attachments/assets/7ab0a4be-caf2-4b44-946d-6e1689131b32" />
 
+
 Two tests were run during the staging table build, the purpose of which is to ensure that all LIC and NAIC codes appear in LIC and NAIC lookup tables, so that we know no wrong codes were used in the fact table.
 
 Finally, the model shcema yml file contains descriptions of the final fact table and the columns in it. Dbt auto-generate documentations based on that.
