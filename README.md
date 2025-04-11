@@ -94,8 +94,9 @@ Note the `[taskrun.value]` after the `extract`. The `taskrun.value` is the curre
 In this section, 4 fact tables and 3 dimension tables were generated and sent to BigQuery. The 4 fact tables include (1) the master fact table of all registered business records in SF; (2) the aggregated monthly business activities by business location start date; (3) all registered business records in SF for inactive business locations; (4) all registered business records in SF for businesses with at least one active location. the 4 fact tables should be able to meet the daily analytics needs with different areas of focus and granularities.
 
 The dbt lineage chart is as below:
+
 <img width="907" alt="Screenshot 2025-04-10 at 8 45 49 PM" src="https://github.com/user-attachments/assets/7ab0a4be-caf2-4b44-946d-6e1689131b32" />
 
-Two tests were ran during the staging table building, the purpose of which is to ensure that all LIC and NAIC codes appear in LIC and NAIC lookup tables, so that we know no wrong codes were used in the fact table.
+Two tests were ran during the staging table build, the purpose of which is to ensure that all LIC and NAIC codes appear in LIC and NAIC lookup tables, so that we know no wrong codes were used in the fact table.
 
 Finally, the model shcema yml file contains descriptions of the final fact table and the columns in it. Dbt auto-generate documentations based on that.
